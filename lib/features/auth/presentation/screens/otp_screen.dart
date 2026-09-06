@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 
 class OtpScreen extends StatefulWidget {
   final String email;
-  OtpScreen({super.key, required this.email});
+  const OtpScreen({super.key, required this.email});
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
