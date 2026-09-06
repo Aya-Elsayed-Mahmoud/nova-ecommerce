@@ -2,6 +2,7 @@ import 'package:device_preview/device_preview.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'features/auth/presentation/screens/splash_screen.dart';
 import 'features/onboarding/data/onboarding_repository.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -45,9 +46,7 @@ class NovaApp extends StatelessWidget {
         ),
       ),
 
-      home: OnboardingScreen(
-        repository: onboardingRepository,
-      ),
+      home:OnboardingScreen(repository: onboardingRepository,),
     );
   }
 }
