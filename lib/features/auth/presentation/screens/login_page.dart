@@ -1,10 +1,16 @@
 import 'dart:convert';
-import 'forgot_password_screen.dart';
-import 'signup_page.dart';
-import 'validators.dart';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../home/views/screens.dart';
+import '../../../onboarding/data/onboarding_repository.dart';
+import '../../../onboarding/presentation/screens/onboarding_screen.dart';
+import 'forgot_password_screen.dart';
+import 'signup_page.dart';
+import 'validators.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -22,9 +28,7 @@ class _LoginPageState extends State<LoginPage> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passController = TextEditingController();
 
-
   Future<void> _login() async {
-
     if (!formKey.currentState!.validate()) return;
 
     setState(() {
@@ -45,36 +49,64 @@ class _LoginPageState extends State<LoginPage> {
         }),
       );
 
-      if (response.statusCode == 200) {
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
+        final String accessToken = data['accessToken'] ?? '';
 
-
-        final String accessToken = data['accessToken'];
         if (kDebugMode) {
           print("Logged in successfully! Token: $accessToken");
-
         }
 
-        // Navigate to first onboarding screen---------------------------------------
-        if (mounted) {
+        final prefs = await SharedPreferences.getInstance();
+        if (accessToken.isNotEmpty) {
+          await prefs.setString('accessToken', accessToken);
+        }
 
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
+        final onboardingRepository = OnboardingRepository(prefs);
+
+        final bool isCompleted = onboardingRepository.isOnboardingCompleted();
+
+        if (mounted) {
+          if (isCompleted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const PersonalizationScreen(),
+              ),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => OnboardingScreen(
+                  repository: onboardingRepository,
+                ),
+              ),
+            );
+          }
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(backgroundColor:Colors.red,content: Text('Login failed: ${response.statusCode} - ${response.body}',style: TextStyle(color: Colors.white),)),
+            SnackBar(
+              backgroundColor: Colors.red,
+              content: Text(
+                'Login failed: ${response.statusCode} - ${response.body}',
+                style: const TextStyle(color: Colors.white),
+              ),
+            ),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(backgroundColor:Colors.red,content: Text('An error occurred: $e',style: TextStyle(color: Colors.white)),
-        ));
+          SnackBar(
+            backgroundColor: Colors.red,
+            content: Text(
+              'An error occurred: $e',
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+        );
       }
     } finally {
       if (mounted) {
@@ -217,9 +249,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 32),
               ElevatedButton(
-                onPressed: () {
-
-                },
+                onPressed: () {},
                 style: ElevatedButton.styleFrom(
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(15),
@@ -277,19 +307,6 @@ class _LoginPageState extends State<LoginPage> {
           ),
         ),
       ),
-    );
-  }
-}
-
-
-class HomePage extends StatelessWidget {
-  const HomePage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text("Home")),
-      body: const Center(child: Text("Home Page")),
     );
   }
 }

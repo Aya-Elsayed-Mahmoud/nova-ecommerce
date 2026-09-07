@@ -24,10 +24,8 @@ class _SignUpPageState extends State<SignUpPage> {
   final TextEditingController lastNameController = TextEditingController();
   final TextEditingController confirmPassController = TextEditingController();
 
-
   Future<void> _signUp() async {
-
-    if (!formKey.currentState!.validate()) return ;
+    if (!formKey.currentState!.validate()) return;
 
     setState(() {
       _isLoading = true;
@@ -50,11 +48,16 @@ class _SignUpPageState extends State<SignUpPage> {
       );
 
 
-      if (response.statusCode == 204 || response.statusCode == 200 || response.statusCode == 201) {
+      debugPrint("Status Code: ${response.statusCode}");
+      debugPrint("Response Body: ${response.body}");
+
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
-              content: Text( "Registration Successful, an otp is sent to your email inbox please use it to verify your email"
+              content: Text(
+                "Registration Successful, an OTP has been sent to your email.",
               ),
               backgroundColor: Colors.green,
             ),
@@ -62,13 +65,31 @@ class _SignUpPageState extends State<SignUpPage> {
 
           Navigator.pushReplacement(
             context,
-            MaterialPageRoute(builder: (context) => OtpScreen(email: emailController.text,)),);
+            MaterialPageRoute(
+              builder: (context) => OtpScreen(
+                email: emailController.text.trim(),
+              ),
+            ),
+          );
         }
       } else {
+
+        String errorMessage = 'Registration failed (${response.statusCode})';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData is Map && errorData.containsKey('message')) {
+            errorMessage = errorData['message'];
+          } else if (errorData is String) {
+            errorMessage = errorData;
+          }
+        } catch (_) {
+          errorMessage = response.body.isNotEmpty ? response.body : errorMessage;
+        }
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text('Registration failed: ${response.statusCode} - ${response.body}'),
+              content: Text(errorMessage),
               backgroundColor: Colors.red,
             ),
           );
