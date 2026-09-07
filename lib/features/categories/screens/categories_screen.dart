@@ -1,7 +1,6 @@
-
 import 'package:flutter/material.dart';
 
-import '../../home/screens/home_explore_screens.dart';
+import '../../home/screens/MainScreens.dart';
 import '../../product/screens/category_products.dart';
 
 
