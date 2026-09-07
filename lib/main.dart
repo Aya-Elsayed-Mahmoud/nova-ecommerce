@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:nova_ecommerce/features/auth/presentation/screens/splash_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import 'features/home/screens/home_explore_screens.dart';
 import 'features/onboarding/data/onboarding_repository.dart';
 import 'features/onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -86,7 +87,8 @@ class NovaApp extends StatelessWidget {
 
 
 
-      home:SplashScreen()
+      home:PersonalizationScreen()
+      //SplashScreen()
     );
 
   }

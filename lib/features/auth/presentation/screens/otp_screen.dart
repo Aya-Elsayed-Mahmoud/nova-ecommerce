@@ -5,7 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../home/views/screens.dart';
+import '../../../home/screens/home_explore_screens.dart';
 import '../../../onboarding/data/onboarding_repository.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 
