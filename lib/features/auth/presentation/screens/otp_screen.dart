@@ -3,6 +3,11 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+
+import '../../../home/views/screens.dart';
+import '../../../onboarding/data/onboarding_repository.dart';
+import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 
 class OtpScreen extends StatefulWidget {
   final String email;
@@ -10,6 +15,7 @@ class OtpScreen extends StatefulWidget {
   @override
   State<OtpScreen> createState() => _OtpScreenState();
 }
+
 class _OtpScreenState extends State<OtpScreen> {
   final List<TextEditingController> _controllers = List.generate(6, (index) => TextEditingController());
   final List<FocusNode> _focusNodes = List.generate(6, (index) => FocusNode());
@@ -23,20 +29,25 @@ class _OtpScreenState extends State<OtpScreen> {
     super.initState();
     startTimer();
   }
+
   void startTimer() {
     _start = 60;
     _canResend = false;
     _timer?.cancel();
-    _timer = Timer.periodic(Duration(seconds: 1), (timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_start == 0) {
-        setState(() {
-          _timer?.cancel();
-          _canResend = true;
-        });
+        if (mounted) {
+          setState(() {
+            _timer?.cancel();
+            _canResend = true;
+          });
+        }
       } else {
-        setState(() {
-          _start--;
-        });
+        if (mounted) {
+          setState(() {
+            _start--;
+          });
+        }
       }
     });
   }
@@ -52,12 +63,13 @@ class _OtpScreenState extends State<OtpScreen> {
     }
     super.dispose();
   }
+
   Future<void> verifyOtp() async {
     String otpCode = _controllers.map((c) => c.text).join();
 
     if (otpCode.length < 6) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter the complete 6-digit code')),
+        const SnackBar(content: Text('Please enter the complete 6-digit code')),
       );
       return;
     }
@@ -67,6 +79,9 @@ class _OtpScreenState extends State<OtpScreen> {
     });
 
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final onboardingRepository = OnboardingRepository(prefs);
+
       final url = Uri.parse('https://accessories-eshop.runasp.net/api/auth/validate-otp');
 
       final response = await http.post(
@@ -77,27 +92,56 @@ class _OtpScreenState extends State<OtpScreen> {
           'otp': otpCode,
         }),
       );
-      setState(() {
-        isLoading = false;
-      });
-      if (response.statusCode == 200) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('OTP Verified Successfully!')),
-        );
+
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
+
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('OTP Verified Successfully!')),
+          );
+
+          final bool isCompleted = onboardingRepository.isOnboardingCompleted();
+
+          if (isCompleted) {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => const PersonalizationScreen(),
+              ),
+            );
+          } else {
+            Navigator.of(context).pushReplacement(
+              MaterialPageRoute(
+                builder: (context) => OnboardingScreen(
+                  repository: onboardingRepository,
+                ),
+              ),
+            );
+          }
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.body}')),
-        );
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error: ${response.body}')),
+          );
+        }
       }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Connection error: $e')),
-      );
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Connection error: $e')),
+        );
+      }
     }
   }
+
   Future<void> resendOtpCode() async {
     try {
       final url = Uri.parse('https://accessories-eshop.runasp.net/api/auth/forgot-password');
@@ -106,14 +150,18 @@ class _OtpScreenState extends State<OtpScreen> {
         headers: {'Content-Type': 'application/json'},
         body: jsonEncode({'email': widget.email}),
       );
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('A new OTP code has been sent.')),
-      );
-      startTimer();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('A new OTP code has been sent.')),
+        );
+        startTimer();
+      }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Failed to resend code: $e')),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Failed to resend code: $e')),
+        );
+      }
     }
   }
 
@@ -129,18 +177,18 @@ class _OtpScreenState extends State<OtpScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 'NOVA',
                 style: TextStyle(
                   fontSize: 35,
@@ -148,9 +196,9 @@ class _OtpScreenState extends State<OtpScreen> {
                   letterSpacing: 2,
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Container(
-                padding: EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -158,7 +206,7 @@ class _OtpScreenState extends State<OtpScreen> {
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 15,
-                      offset: Offset(0, 5),
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -166,19 +214,19 @@ class _OtpScreenState extends State<OtpScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Container(
-                      padding: EdgeInsets.all(12),
+                      padding: const EdgeInsets.all(12),
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
                         color: Colors.grey[100],
                       ),
-                      child: Icon(
+                      child: const Icon(
                         Icons.lock_open_rounded,
                         size: 28,
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Text(
+                    const SizedBox(height: 20),
+                    const Text(
                       'Enter OTP',
                       style: TextStyle(
                         fontSize: 22,
@@ -186,7 +234,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Text(
                       'A secure 6-digit code has been sent to your email.\nEnter it below to continue.',
                       textAlign: TextAlign.center,
@@ -196,27 +244,27 @@ class _OtpScreenState extends State<OtpScreen> {
                         height: 1.4,
                       ),
                     ),
-                    SizedBox(height: 30),
+                    const SizedBox(height: 30),
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: List.generate(6, (index) => Container(
                         width: 38,
                         height: 48,
-                        margin: EdgeInsets.symmetric(horizontal: 2),
+                        margin: const EdgeInsets.symmetric(horizontal: 2),
                         child: TextField(
                           controller: _controllers[index],
                           focusNode: _focusNodes[index],
                           maxLength: 1,
                           keyboardType: TextInputType.number,
                           textAlign: TextAlign.center,
-                          style: TextStyle(
+                          style: const TextStyle(
                             fontSize: 22,
                             fontWeight: FontWeight.bold,
                             color: Colors.black,
                           ),
                           decoration: InputDecoration(
                             counterText: '',
-                            contentPadding: EdgeInsets.symmetric(vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
                             filled: true,
                             fillColor: Colors.grey[50],
                             border: OutlineInputBorder(
@@ -225,7 +273,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             ),
                             focusedBorder: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide(color: Colors.black, width: 1.5),
+                              borderSide: const BorderSide(color: Colors.black, width: 1.5),
                             ),
                           ),
                           onChanged: (value) {
@@ -242,11 +290,11 @@ class _OtpScreenState extends State<OtpScreen> {
                         ),
                       )),
                     ),
-                    SizedBox(height: 16),
+                    const SizedBox(height: 16),
                     _canResend
                         ? TextButton(
                       onPressed: resendOtpCode,
-                      child: Text(
+                      child: const Text(
                         'Resend Code Now',
                         style: TextStyle(
                           fontSize: 13,
@@ -263,7 +311,7 @@ class _OtpScreenState extends State<OtpScreen> {
                         fontWeight: FontWeight.w500,
                       ),
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -277,7 +325,7 @@ class _OtpScreenState extends State<OtpScreen> {
                           elevation: 0,
                         ),
                         child: isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
@@ -285,7 +333,7 @@ class _OtpScreenState extends State<OtpScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                            : Text(
+                            : const Text(
                           'VERIFY & CONTINUE',
                           style: TextStyle(
                             fontSize: 15,
@@ -295,12 +343,12 @@ class _OtpScreenState extends State<OtpScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     TextButton(
                       onPressed: () {
                         Navigator.pop(context);
                       },
-                      child: Text(
+                      child: const Text(
                         '< Back to Email Address',
                         style: TextStyle(
                           color: Colors.black54,
@@ -319,3 +367,4 @@ class _OtpScreenState extends State<OtpScreen> {
     );
   }
 }
+

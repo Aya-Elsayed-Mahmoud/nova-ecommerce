@@ -12,7 +12,7 @@ class OnboardingRepository {
 
   OnboardingRepository(this._prefs);
 
-  bool hasCompletedOnboarding() {
+  bool isOnboardingCompleted() {
     return _prefs.getBool(_onboardingCompletedKey) ?? false;
   }
 
