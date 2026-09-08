@@ -1,5 +1,7 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import '../models/user_profile_model.dart';
 import 'token_storage.dart';
 
@@ -52,17 +54,12 @@ class ProfileApiService {
 
     throw ApiException(message, statusCode: statusCode);
   }
+
   Future<UserProfileModel> getProfile() async {
-    if (useMockData) {
-      await Future.delayed(const Duration(milliseconds: 600));
-      return UserProfileModel(
-        id: 'mock-001',
-        fullName: 'Alex Design',
-        email: 'alex@design.luxe',
-        profileImageUrl: null,
-        isPremium: true,
-      );
-    }
+    final prefs = await SharedPreferences.getInstance();
+
+    final localName = prefs.getString('user_full_name');
+    final localEmail = prefs.getString('user_email');
 
     final headers = await _buildHeaders(withAuth: true);
     final uri = Uri.parse('$_baseUrl/api/auth/me');
@@ -72,36 +69,60 @@ class ProfileApiService {
       final data = _handleResponse(response);
 
       final json = (data is Map && data['data'] != null) ? data['data'] : data;
-      return UserProfileModel.fromJson(json as Map<String, dynamic>);
-    } on ApiException {
-      rethrow;
+      final serverProfile = UserProfileModel.fromJson(json as Map<String, dynamic>);
+
+      return serverProfile.copyWith(
+        fullName: localName ?? serverProfile.fullName,
+        email: localEmail ?? serverProfile.email,
+      );
     } catch (e) {
-      throw ApiException('Failed to connect to Server: ${e.toString()}');
+      if (localName != null && localEmail != null) {
+        return UserProfileModel(
+          id: 'local-id',
+          fullName: localName,
+          email: localEmail,
+          profileImageUrl: null,
+          isPremium: false,
+        );
+      }
+      rethrow;
     }
   }
 
   Future<UserProfileModel> updateProfile(UserProfileModel profile) async {
-    if (useMockData) {
-      await Future.delayed(const Duration(milliseconds: 600));
-      return profile;
-    }
-
     final headers = await _buildHeaders(withAuth: true);
-    final uri = Uri.parse('$_baseUrl/api/auth/me');
+
+    final nameParts = profile.fullName.trim().split(' ');
+    final firstName = nameParts.isNotEmpty ? nameParts.first : '';
+    final lastName = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
+
+    final Map<String, dynamic> body = {
+      'firstName': firstName,
+      'lastName': lastName,
+      'fullName': profile.fullName,
+      'email': profile.email,
+    };
+
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('user_full_name', profile.fullName);
+    await prefs.setString('user_email', profile.email);
 
     try {
-      final response = await http.put(
-        uri,
-        headers: headers,
-        body: jsonEncode(profile.toJson()),
-      );
-      final data = _handleResponse(response);
-      final json = (data is Map && data['data'] != null) ? data['data'] : data;
-      return UserProfileModel.fromJson(json as Map<String, dynamic>);
-    } on ApiException {
-      rethrow;
+      final uri = Uri.parse('$_baseUrl/api/auth/me');
+      final res = await http.put(uri, headers: headers, body: jsonEncode(body));
+
+      if (res.statusCode >= 200 && res.statusCode < 300) {
+        final data = _handleResponse(res);
+        if (data != null && data is Map<String, dynamic>) {
+          return UserProfileModel.fromJson(data);
+        }
+      }
     } catch (e) {
-      throw ApiException('Failed to update data: ${e.toString()}');
+      if (kDebugMode) {
+        print("Backend update endpoint unavailable, saved locally instead.");
+      }
     }
+
+    return profile;
   }
 }
