@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../home/screens/MainScreens.dart';
 import '../../../onboarding/presentation/screens/personalization_ready_screen.dart';
 import '../../../profile/services/token_storage.dart';
 import 'login_page.dart';
@@ -25,7 +24,6 @@ class _SplashScreenState extends State<SplashScreen>
       duration: const Duration(seconds: 3),
     );
 
-    // 🚀 عند انتهاء الأنيميشن، يتم فحص التوكن للتوجيه المباشر
     _controller.forward().then((_) {
       if (!mounted) return;
       _checkAuthStatus();
@@ -33,20 +31,17 @@ class _SplashScreenState extends State<SplashScreen>
   }
 
   Future<void> _checkAuthStatus() async {
-    // 🔍 فحص وجود التوكين في FlutterSecureStorage
     final String? token = await TokenStorage.getToken();
 
     if (!mounted) return;
 
     if (token != null && token.isNotEmpty) {
-      // 🔓 التوكن موجود -> الانتقال للتطبيق مباشرة
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const PersonalizationScreen(),
         ),
       );
     } else {
-      // 🔒 التوكن غير موجود -> الانتقال لصفحة تسجيل الدخول
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (context) => const LoginPage(),

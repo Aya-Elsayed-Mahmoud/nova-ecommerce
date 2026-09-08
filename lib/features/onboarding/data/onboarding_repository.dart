@@ -12,13 +12,12 @@ class OnboardingRepository {
 
   OnboardingRepository(this._prefs);
 
-  /// قراءة حالة الـ Onboarding هل تم إكماله أم لا
+
   bool isOnboardingCompleted() {
     return _prefs.getBool(_onboardingCompletedKey) ?? false;
   }
 
-  /// التعديل: قبول قيمة بولينية لتحديد حالة الـ Onboarding
-  /// عند الـ Register يُرسل [false], وعند نهاية الـ Onboarding يُرسل [true]
+
   Future<void> setOnboardingCompleted([bool completed = true]) async {
     await _prefs.setBool(_onboardingCompletedKey, completed);
   }

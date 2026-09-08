@@ -1,9 +1,3 @@
-// temp_home_screen.dart
-// ⚠️ ملف مؤقت للاختبار فقط — احذفه عند دمج الكود مع باقي الفريق.
-// الهدف منه إتاحة شريط سفلي بسيط (Bottom Nav) بنفس شكل التصميم المرفق
-// (Home / Explore / Wishlist / Profile) عشان تقدر توصل لشاشة الـ Profile
-// وتختبرها بمعزل عن باقي شاشات الفريق.
-
 import 'package:flutter/material.dart';
 import 'screens/profile_screen.dart';
 import 'theme/nova_theme.dart';
@@ -16,7 +10,7 @@ class TempHomeScreen extends StatefulWidget {
 }
 
 class _TempHomeScreenState extends State<TempHomeScreen> {
-  int _currentIndex = 3; // نفتح على تاب الـ Profile مباشرة للاختبار
+  int _currentIndex = 3;
 
   final List<Widget> _tabs = const [
     _PlaceholderTab(label: 'Home'),
@@ -58,7 +52,7 @@ class _PlaceholderTab extends StatelessWidget {
       backgroundColor: NovaColors.background,
       body: Center(
         child: Text(
-          '$label — من مسؤولية باقي الفريق',
+          '$label ق',
           style: const TextStyle(color: NovaColors.secondaryText),
         ),
       ),

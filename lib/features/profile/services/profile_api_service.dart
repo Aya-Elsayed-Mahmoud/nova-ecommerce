@@ -1,4 +1,3 @@
-// profile_api_service.dart
 import 'dart:convert';
 import 'package:http/http.dart' as http;
 import '../models/user_profile_model.dart';
@@ -53,10 +52,6 @@ class ProfileApiService {
 
     throw ApiException(message, statusCode: statusCode);
   }
-
-  // ---------------------------------------------------------------------
-  // 1) GET /api/auth/me
-  // ---------------------------------------------------------------------
   Future<UserProfileModel> getProfile() async {
     if (useMockData) {
       await Future.delayed(const Duration(milliseconds: 600));
@@ -85,9 +80,6 @@ class ProfileApiService {
     }
   }
 
-  // ---------------------------------------------------------------------
-  // 2) PUT Profile Update
-  // ---------------------------------------------------------------------
   Future<UserProfileModel> updateProfile(UserProfileModel profile) async {
     if (useMockData) {
       await Future.delayed(const Duration(milliseconds: 600));

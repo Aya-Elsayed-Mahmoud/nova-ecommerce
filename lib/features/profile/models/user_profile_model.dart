@@ -1,7 +1,3 @@
-// user_profile_model.dart
-// Model مسؤول عن تمثيل بيانات الملف الشخصي (Response من GET /api/auth/me
-// و Request/Response الخاص بالتعديل)
-
 class UserProfileModel {
   final String id;
   final String fullName;
@@ -21,7 +17,6 @@ class UserProfileModel {
     this.isPremium = false,
   });
 
-  /// تحويل الـ JSON القادم من الـ API إلى Object
   factory UserProfileModel.fromJson(Map<String, dynamic> json) {
     return UserProfileModel(
       id: json['userId']?.toString() ?? json['id']?.toString() ?? '',
@@ -34,7 +29,6 @@ class UserProfileModel {
     );
   }
 
-  /// تحويل الـ Object إلى JSON إرساله وقت التعديل
   Map<String, dynamic> toJson() {
     return {
       'fullName': fullName,
@@ -44,7 +38,6 @@ class UserProfileModel {
     };
   }
 
-  /// نسخة معدّلة من نفس الموديل
   UserProfileModel copyWith({
     String? fullName,
     String? email,

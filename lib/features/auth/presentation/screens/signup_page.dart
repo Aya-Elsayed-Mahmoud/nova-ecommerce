@@ -53,7 +53,6 @@ class _SignUpPageState extends State<SignUpPage> {
       debugPrint("Response Body: ${response.body}");
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        // إعادة تعيين Onboarding بـ false لضمان توجيه المستخدم الجديد للـ Onboarding بعد الـ Login
         final prefs = await SharedPreferences.getInstance();
         final onboardingRepo = OnboardingRepository(prefs);
         await onboardingRepo.setOnboardingCompleted(false);

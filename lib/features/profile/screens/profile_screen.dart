@@ -1,9 +1,6 @@
-// profile_screen.dart
-
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:nova_ecommerce/features/auth/presentation/screens/login_page.dart';
-import 'package:nova_ecommerce/features/home/screens/MainScreens.dart';
 import '../../../core/theme/app_theme.dart';
 import '../../cart/cartScreen.dart';
 import '../models/user_profile_model.dart';

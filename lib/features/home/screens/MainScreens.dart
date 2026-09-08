@@ -352,7 +352,6 @@ class _MainLayoutState extends State<MainLayout> {
     });
   }
 
-  // تم الاعتماد على getter لتمرير _userProfile تلقائياً وديناميكياً
   List<Widget> get _screens => [
     HomeScreenContent(profile: _userProfile),
     const CategoriesScreen(),
@@ -423,7 +422,6 @@ class HomeScreenContent extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
-    // استخراج أول كلمة من الـ fullName الخاص بالـ profile
     final firstName = profile?.fullName?.trim().isNotEmpty == true
         ? profile!.fullName!.trim().split(' ').first
         : 'User';

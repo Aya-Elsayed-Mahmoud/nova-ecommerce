@@ -1,5 +1,3 @@
-//Order Confirmation
-
 import 'package:flutter/material.dart';
 
 import '../home/screens/MainScreens.dart';

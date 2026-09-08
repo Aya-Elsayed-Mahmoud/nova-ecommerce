@@ -11,7 +11,6 @@ void main() async {
 
   final prefs = await SharedPreferences.getInstance();
 
-  // Initialize the saved theme state
   await AppTheme.initTheme(prefs);
 
   final onboardingRepository = OnboardingRepository(prefs);

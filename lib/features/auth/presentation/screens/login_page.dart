@@ -7,7 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../onboarding/data/onboarding_repository.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
-import '../../../profile/services/token_storage.dart'; // استيراد TokenStorage
+import '../../../profile/services/token_storage.dart';
 import 'forgot_password_screen.dart';
 import 'signup_page.dart';
 import 'validators.dart';
@@ -58,12 +58,11 @@ class _LoginPageState extends State<LoginPage> {
 
         final prefs = await SharedPreferences.getInstance();
 
-        // ------------------ حفظ الـ Session والـ Token ------------------
         if (accessToken.isNotEmpty) {
           await prefs.setString('accessToken', accessToken);
-          await TokenStorage.saveSession(token: accessToken); // حفظ السيشن للبروفايل
+          await TokenStorage.saveSession(token: accessToken);
         }
-        // ----------------------------------------------------------------
+
 
         final onboardingRepo = OnboardingRepository(prefs);
         if (mounted) {

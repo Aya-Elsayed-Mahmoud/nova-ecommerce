@@ -1,6 +1,3 @@
-
-
-// Cart-------------
 import 'package:flutter/material.dart';
 
 import '../categories/screens/categories_screen.dart';
@@ -15,7 +12,6 @@ class CartItem {
   CartItem({required this.product, this.quantity = 1, this.color = 'Onyx'});
 }
 
-// مدير السلة العام لتحديث البيانات ديناميكياً
 class CartManager {
   static final ValueNotifier<List<CartItem>> items = ValueNotifier([]);
 
@@ -97,7 +93,6 @@ class CartScreen extends StatelessWidget {
       body: ValueListenableBuilder<List<CartItem>>(
         valueListenable: CartManager.items,
         builder: (context, cartItems, child) {
-          // الشاشة الثانية: في حالة الشنطة فارغة
           if (cartItems.isEmpty) {
             return Center(
               child: Padding(
@@ -165,7 +160,6 @@ class CartScreen extends StatelessWidget {
             );
           }
 
-          // الشاشة الأولى: حالة وجود عناصر في السلة
           return Column(
             children: [
               Expanded(
@@ -214,7 +208,6 @@ class CartScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // Cart Items List
                       ListView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
@@ -370,7 +363,7 @@ class CartScreen extends StatelessWidget {
                       ),
                       const SizedBox(height: 20),
 
-                      // Order Summary Box
+
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
@@ -480,7 +473,6 @@ class CartScreen extends StatelessWidget {
                 ),
               ),
 
-              // Bottom Confirm Button
               Padding(
                 padding: const EdgeInsets.all(16.0),
                 child: SizedBox(
