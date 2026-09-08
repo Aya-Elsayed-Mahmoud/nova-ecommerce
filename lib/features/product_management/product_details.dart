@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import '../Wishlist/wishlist.dart';
+import '../cart/cartScreen.dart';
 import '../home/screens/MainScreens.dart';
 
 class ProductDetailsScreen extends StatefulWidget {
@@ -13,7 +15,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   bool isFavorite = false;
   int selectedColorIndex = 0;
 
-  // قائمة ألوان متعدّدة ومنوعة
   final List<Map<String, dynamic>> colors = [
     {'name': 'Charcoal Black', 'color': const Color(0xFF2B2B2B)},
     {'name': 'Cream White', 'color': const Color(0xFFEFECE6)},
@@ -26,9 +27,35 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: SafeArea(
+      backgroundColor: theme.scaffoldBackgroundColor,
+      appBar: AppBar(
+        backgroundColor: theme.scaffoldBackgroundColor,
+        elevation: 0,
+        centerTitle: true,
+        title: Text(
+          'NOVA',
+          style: TextStyle(
+            color: theme.textTheme.bodyLarge?.color,
+            fontWeight: FontWeight.bold,
+            fontSize: 18,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(
+            Icons.arrow_back_ios_new,
+            color: theme.iconTheme.color ?? theme.textTheme.bodyLarge?.color,
+          ),
+          onPressed: () {
+            Navigator.pop(context);
+          },
+        ),
+      )
+      ,body: SafeArea(
         child: Column(
           children: [
             Expanded(
@@ -36,14 +63,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Image Container with floating action buttons
                     Stack(
                       children: [
                         Container(
                           height: 420,
                           width: double.infinity,
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF5F5F5),
+                            color: isDark ? colorScheme.surfaceContainerHighest : const Color(0xFFF5F5F5),
                             image: DecorationImage(
                               image: NetworkImage(widget.product.imageUrl),
                               fit: BoxFit.cover,
@@ -54,9 +80,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           top: 16,
                           left: 16,
                           child: CircleAvatar(
-                            backgroundColor: Colors.white,
+                            backgroundColor: theme.cardColor,
                             child: IconButton(
-                              icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
+                              icon: Icon(Icons.arrow_back, color: colorScheme.onSurface, size: 20),
                               onPressed: () => Navigator.pop(context),
                             ),
                           ),
@@ -67,19 +93,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           child: Row(
                             children: [
                               CircleAvatar(
-                                backgroundColor: Colors.white,
+                                backgroundColor: theme.cardColor,
                                 child: IconButton(
-                                  icon: const Icon(Icons.share_outlined, color: Colors.black, size: 20),
+                                  icon: Icon(Icons.share_outlined, color: colorScheme.onSurface, size: 20),
                                   onPressed: () {},
                                 ),
                               ),
                               const SizedBox(width: 10),
                               CircleAvatar(
-                                backgroundColor: Colors.white,
+                                backgroundColor: theme.cardColor,
                                 child: IconButton(
                                   icon: Icon(
                                     isFavorite ? Icons.favorite : Icons.favorite_border,
-                                    color: isFavorite ? Colors.red : Colors.black,
+                                    color: isFavorite ? colorScheme.error : colorScheme.onSurface,
                                     size: 20,
                                   ),
                                   onPressed: () {
@@ -109,10 +135,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Text(
+                          Text(
                             'ACNE STUDIOS',
                             style: TextStyle(
-                              color: Colors.grey,
+                              color: theme.hintColor,
                               fontSize: 12,
                               fontWeight: FontWeight.w600,
                               letterSpacing: 1.2,
@@ -121,28 +147,31 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           const SizedBox(height: 6),
                           Text(
                             widget.product.title,
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 22,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: theme.textTheme.titleLarge?.color ?? colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 8),
 
-                          // Rating and Reviews Row
-                          const Row(
+                          Row(
                             children: [
-                              Icon(Icons.star, size: 16, color: Colors.black),
-                              SizedBox(width: 4),
+                              Icon(Icons.star, size: 16, color: colorScheme.primary),
+                              const SizedBox(width: 4),
                               Text(
                                 '4.9',
-                                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                  color: colorScheme.onSurface,
+                                ),
                               ),
-                              SizedBox(width: 4),
+                              const SizedBox(width: 4),
                               Text(
                                 '· (128 reviews)',
                                 style: TextStyle(
-                                  color: Colors.grey,
+                                  color: theme.hintColor,
                                   fontSize: 13,
                                   decoration: TextDecoration.underline,
                                 ),
@@ -151,41 +180,38 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                           ),
                           const SizedBox(height: 16),
 
-                          // Price
                           Text(
                             'EGP ${widget.product.price}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 20,
                               fontWeight: FontWeight.bold,
-                              color: Colors.black,
+                              color: colorScheme.onSurface,
                             ),
                           ),
                           const SizedBox(height: 24),
 
-                          // Color Selection Header
                           Row(
                             children: [
-                              const Text(
+                              Text(
                                 'Color: ',
                                 style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.w600,
-                                  color: Colors.black,
+                                  color: colorScheme.onSurface,
                                 ),
                               ),
                               Text(
                                 colors[selectedColorIndex]['name'],
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 14,
                                   fontWeight: FontWeight.normal,
-                                  color: Colors.grey,
+                                  color: theme.hintColor,
                                 ),
                               ),
                             ],
                           ),
                           const SizedBox(height: 12),
 
-                          // Horizontal Scrollable Color List
                           SizedBox(
                             height: 36,
                             child: ListView.builder(
@@ -205,7 +231,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                                     decoration: BoxDecoration(
                                       shape: BoxShape.circle,
                                       border: Border.all(
-                                        color: isSelected ? Colors.black : Colors.transparent,
+                                        color: isSelected ? colorScheme.primary : Colors.transparent,
                                         width: 1.5,
                                       ),
                                     ),
@@ -226,14 +252,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
             ),
 
-            // Bottom Add to Bag Bar
             Container(
               padding: const EdgeInsets.all(16),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: theme.cardColor,
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(isDark ? 0.3 : 0.05),
                     blurRadius: 10,
                     offset: const Offset(0, -5),
                   )
@@ -243,9 +268,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E1E2C),
-                    shape: RoundedRectangleBorder(
+                  style: ElevatedButton.styleFrom(shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
                   ),
@@ -255,10 +278,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       const SnackBar(content: Text('Added to bag successfully!')),
                     );
                   },
-                  child: const Text(
+                  child: Text(
                     'Add to Cart',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: colorScheme.onPrimary,
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                     ),

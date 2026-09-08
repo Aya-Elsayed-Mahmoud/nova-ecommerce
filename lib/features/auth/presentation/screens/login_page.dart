@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../home/screens/MainScreens.dart';
 import '../../../onboarding/data/onboarding_repository.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
+import '../../../profile/services/token_storage.dart'; // استيراد TokenStorage
 import 'forgot_password_screen.dart';
 import 'signup_page.dart';
 import 'validators.dart';
@@ -22,7 +22,6 @@ class LoginPage extends StatefulWidget {
 class _LoginPageState extends State<LoginPage> {
   final formKey = GlobalKey<FormState>();
   late bool _isHidden = true;
-
   bool _isLoading = false;
 
   final TextEditingController emailController = TextEditingController();
@@ -35,14 +34,14 @@ class _LoginPageState extends State<LoginPage> {
       _isLoading = true;
     });
 
-    final url = Uri.parse('https://accessories-eshop.runasp.net/api/auth/login');
+    final url = Uri.parse(
+      'https://accessories-eshop.runasp.net/api/auth/login',
+    );
 
     try {
       final response = await http.post(
         url,
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode({
           'email': emailController.text.trim(),
           'password': passController.text,
@@ -51,39 +50,34 @@ class _LoginPageState extends State<LoginPage> {
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
         final data = jsonDecode(response.body);
-        final String accessToken = data['accessToken'] ?? '';
+        final String accessToken = data['accessToken'] ?? data['token'] ?? '';
 
         if (kDebugMode) {
           print("Logged in successfully! Token: $accessToken");
         }
 
         final prefs = await SharedPreferences.getInstance();
+
+        // ------------------ حفظ الـ Session والـ Token ------------------
         if (accessToken.isNotEmpty) {
           await prefs.setString('accessToken', accessToken);
+          await TokenStorage.saveSession(token: accessToken); // حفظ السيشن للبروفايل
         }
+        // ----------------------------------------------------------------
 
-        final onboardingRepository = OnboardingRepository(prefs);
-
-        final bool isCompleted = onboardingRepository.isOnboardingCompleted();
-
+        final onboardingRepo = OnboardingRepository(prefs);
         if (mounted) {
-          if (isCompleted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const PersonalizationScreen(),
-              ),
-            );
-          } else {
+
             Navigator.of(context).pushReplacement(
               MaterialPageRoute(
                 builder: (context) => OnboardingScreen(
-                  repository: onboardingRepository,
+                  repository: onboardingRepo,
                 ),
               ),
             );
           }
         }
-      } else {
+      else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -130,7 +124,12 @@ class _LoginPageState extends State<LoginPage> {
       body: SingleChildScrollView(
         child: Container(
           width: double.infinity,
-          padding: const EdgeInsets.only(left: 20, top: 110, bottom: 20, right: 20),
+          padding: const EdgeInsets.only(
+            left: 20,
+            top: 110,
+            bottom: 20,
+            right: 20,
+          ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -181,7 +180,9 @@ class _LoginPageState extends State<LoginPage> {
                             borderSide: BorderSide(color: Colors.grey),
                           ),
                           focusedBorder: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(vertical: 5),
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 5,
+                          ),
                           suffixIcon: IconButton(
                             icon: _isHidden
                                 ? const Icon(Icons.visibility_off_outlined)
@@ -212,7 +213,7 @@ class _LoginPageState extends State<LoginPage> {
                             "FORGOT PASSWORD?",
                             style: TextStyle(fontWeight: FontWeight.bold),
                           ),
-                        )
+                        ),
                       ],
                     ),
                     const SizedBox(height: 32),
@@ -300,9 +301,9 @@ class _LoginPageState extends State<LoginPage> {
                         fontSize: 16,
                       ),
                     ),
-                  )
+                  ),
                 ],
-              )
+              ),
             ],
           ),
         ),

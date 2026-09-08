@@ -3,9 +3,9 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
+import 'package:nova_ecommerce/features/auth/presentation/screens/login_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import '../../../home/screens/MainScreens.dart';
 import '../../../onboarding/data/onboarding_repository.dart';
 import '../../../onboarding/presentation/screens/onboarding_screen.dart';
 
@@ -100,30 +100,24 @@ class _OtpScreenState extends State<OtpScreen> {
       }
 
       if (response.statusCode >= 200 && response.statusCode < 300) {
-        if (mounted) {
+        if (mounted)  {
+          final prefs = await SharedPreferences.getInstance();
+          final onboardingRepo = OnboardingRepository(prefs);
+
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('OTP Verified Successfully!')),
           );
 
-          final bool isCompleted = onboardingRepository.isOnboardingCompleted();
 
-          if (isCompleted) {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => const PersonalizationScreen(),
+          Navigator.of(context).pushReplacement(
+            MaterialPageRoute(
+              builder: (context) => OnboardingScreen(
+                repository: onboardingRepo,
               ),
-            );
-          } else {
-            Navigator.of(context).pushReplacement(
-              MaterialPageRoute(
-                builder: (context) => OnboardingScreen(
-                  repository: onboardingRepository,
-                ),
-              ),
-            );
-          }
-        }
-      } else {
+            ),
+          );
+
+        }} else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text('Error: ${response.body}')),
