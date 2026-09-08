@@ -6,7 +6,7 @@ import 'package:http/http.dart' as http;
 import 'otp_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
-  ForgotPasswordScreen({super.key});
+  const ForgotPasswordScreen({super.key});
 
   @override
   State<ForgotPasswordScreen> createState() => _ForgotPasswordScreenState();
@@ -27,7 +27,10 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
     if (email.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Please enter your email address')),
+        const SnackBar(
+          content: Text('Please enter your email address'),
+          backgroundColor: Colors.orange,
+        ),
       );
       return;
     }
@@ -45,29 +48,58 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         body: jsonEncode({'email': email}),
       );
 
-      setState(() {
-        isLoading = false;
-      });
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+      }
 
-      if (response.statusCode == 200) {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => OtpScreen(email: email),
-          ),
-        );
+      if (response.statusCode >= 200 && response.statusCode < 300) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('OTP sent to your email!'),
+              backgroundColor: Colors.green,
+            ),
+          );
+
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => OtpScreen(email: email),
+            ),
+          );
+        }
       } else {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: ${response.body}')),
-        );
+        String errorMessage = 'Failed to send OTP (${response.statusCode})';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData is Map && errorData.containsKey('message')) {
+            errorMessage = errorData['message'];
+          }
+        } catch (_) {}
+
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: Colors.red,
+            ),
+          );
+        }
       }
     } catch (e) {
-      setState(() {
-        isLoading = false;
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Connection error: $e')),
-      );
+      if (mounted) {
+        setState(() {
+          isLoading = false;
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Connection error: $e'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
@@ -79,18 +111,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back_ios, color: Colors.black),
+          icon: const Icon(Icons.arrow_back_ios, color: Colors.black),
           onPressed: () => Navigator.pop(context),
         ),
       ),
       body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(20.0),
+          padding: const EdgeInsets.all(20.0),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
-              SizedBox(height: 10),
-              Text(
+              const SizedBox(height: 10),
+              const Text(
                 'NOVA',
                 style: TextStyle(
                   fontSize: 35,
@@ -98,9 +130,9 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   letterSpacing: 2,
                 ),
               ),
-              SizedBox(height: 30),
+              const SizedBox(height: 30),
               Container(
-                padding: EdgeInsets.all(24.0),
+                padding: const EdgeInsets.all(24.0),
                 decoration: BoxDecoration(
                   color: Colors.white,
                   borderRadius: BorderRadius.circular(24),
@@ -108,7 +140,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                     BoxShadow(
                       color: Colors.black.withOpacity(0.05),
                       blurRadius: 15,
-                      offset: Offset(0, 5),
+                      offset: const Offset(0, 5),
                     ),
                   ],
                 ),
@@ -117,20 +149,20 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   children: [
                     Center(
                       child: Container(
-                        padding: EdgeInsets.all(12),
+                        padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: Colors.grey[100],
                         ),
-                        child: Icon(
+                        child: const Icon(
                           Icons.lock_reset_rounded,
                           size: 28,
                           color: Colors.black,
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
-                    Center(
+                    const SizedBox(height: 20),
+                    const Center(
                       child: Text(
                         'Forgot your\npassword?',
                         textAlign: TextAlign.center,
@@ -142,7 +174,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 12),
+                    const SizedBox(height: 12),
                     Center(
                       child: Text(
                         'Enter your registered email and we\'ll send you a secure OTP code.',
@@ -154,8 +186,8 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 30),
-                    Text(
+                    const SizedBox(height: 30),
+                    const Text(
                       'Email Address',
                       style: TextStyle(
                         fontSize: 13,
@@ -163,7 +195,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         color: Colors.black,
                       ),
                     ),
-                    SizedBox(height: 8),
+                    const SizedBox(height: 8),
                     TextField(
                       controller: _emailController,
                       keyboardType: TextInputType.emailAddress,
@@ -172,18 +204,18 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         hintStyle: TextStyle(fontSize: 14, color: Colors.grey[400]),
                         filled: true,
                         fillColor: Colors.grey[50],
-                        contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
                           borderSide: BorderSide.none,
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: BorderSide(color: Colors.black),
+                          borderSide: const BorderSide(color: Colors.black),
                         ),
                       ),
                     ),
-                    SizedBox(height: 24),
+                    const SizedBox(height: 24),
                     SizedBox(
                       width: double.infinity,
                       height: 50,
@@ -197,7 +229,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                           elevation: 0,
                         ),
                         child: isLoading
-                            ? SizedBox(
+                            ? const SizedBox(
                           width: 20,
                           height: 20,
                           child: CircularProgressIndicator(
@@ -205,7 +237,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                             strokeWidth: 2,
                           ),
                         )
-                            : Text(
+                            : const Text(
                           'SEND OTP CODE',
                           style: TextStyle(
                             fontSize: 15,
@@ -215,13 +247,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                         ),
                       ),
                     ),
-                    SizedBox(height: 20),
+                    const SizedBox(height: 20),
                     Center(
                       child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
-                        child: Text(
+                        child: const Text(
                           '< Back to Sign In',
                           style: TextStyle(
                             color: Colors.black54,

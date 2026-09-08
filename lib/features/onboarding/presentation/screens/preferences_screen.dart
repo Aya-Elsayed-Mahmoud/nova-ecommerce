@@ -34,12 +34,12 @@ class _PreferencesView extends StatefulWidget {
 }
 
 class _PreferencesViewState extends State<_PreferencesView> {
-  int _step = 0; // 0 = style, 1 = colors
+  int _step = 0;
 
   void _goToReadyScreen() {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
-        builder: (context) => const PersonalizationReadyScreen(),
+        builder: (context) => const PersonalizationScreen(),
       ),
     );
   }
@@ -93,6 +93,10 @@ class _PreferencesViewState extends State<_PreferencesView> {
       ),
     );
   }
+}
+
+class PersonalizationReadyScreen {
+  const PersonalizationReadyScreen();
 }
 
 class _StyleStep extends StatelessWidget {

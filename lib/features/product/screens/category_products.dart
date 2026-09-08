@@ -51,21 +51,25 @@ class GenericCategoryProductsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
     final products = _getProductsForCategory(categoryName);
+
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: theme.scaffoldBackgroundColor,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: theme.scaffoldBackgroundColor,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
+          icon: Icon(Icons.arrow_back, color: colorScheme.onSurface),
           onPressed: () => Navigator.pop(context),
         ),
         centerTitle: true,
         title: Text(
           categoryName.toUpperCase(),
-          style: const TextStyle(
-            color: Colors.black,
+          style: TextStyle(
+            color: colorScheme.onSurface,
             fontWeight: FontWeight.bold,
             letterSpacing: 1.5,
           ),
@@ -98,6 +102,7 @@ class GenericCategoryProductsScreen extends StatelessWidget {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
+                        color: isDark ? colorScheme.surfaceContainerHighest : Colors.grey[200],
                         borderRadius: BorderRadius.circular(12),
                         image: DecorationImage(
                           image: NetworkImage(product.imageUrl),
@@ -111,17 +116,19 @@ class GenericCategoryProductsScreen extends StatelessWidget {
                     product.title,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.w500,
                       fontSize: 13,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                   const SizedBox(height: 2),
                   Text(
                     'EGP ${product.price}',
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontWeight: FontWeight.bold,
                       fontSize: 13,
+                      color: colorScheme.onSurface,
                     ),
                   ),
                 ],

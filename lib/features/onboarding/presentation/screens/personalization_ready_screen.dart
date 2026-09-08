@@ -3,9 +3,10 @@ import 'package:nova_ecommerce/core/theme/app_colors.dart';
 import 'package:nova_ecommerce/core/theme/text_style.dart';
 import '../../../../core/helpers/spacing.dart';
 import '../../../../core/widgets/primary_button.dart';
+import '../../../home/screens/MainScreens.dart';
 
-class PersonalizationReadyScreen extends StatelessWidget {
-  const PersonalizationReadyScreen({super.key});
+class PersonalizationScreen extends StatelessWidget {
+  const PersonalizationScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -62,12 +63,9 @@ class PersonalizationReadyScreen extends StatelessWidget {
               PrimaryButton(
                 label: 'Enter NOVA',
                 onPressed: () {
-                  // TODO(auth): login
-                  // Navigator.pushReplacementNamed(context, RouteNames.login);
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text('Login screen not connected yet'),
-                    ),
+                  Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(builder: (context) => const MainLayout()),
                   );
                 },
               ),
